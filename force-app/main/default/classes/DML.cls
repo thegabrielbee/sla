@@ -1,3 +1,7 @@
+/** BeeGroup
+* @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+* @description Class designed to handle DML Operations
+**/
 public with sharing class DML {
     public List<Database.DeleteResult> doDelete(List<SObject> objects){
         return Database.delete(objects);

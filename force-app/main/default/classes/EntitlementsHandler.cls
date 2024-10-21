@@ -1,43 +1,17 @@
-public with sharing class EntitlementsService extends fflib_SObjectDomain {
-    public EntitlementsService(List<Entitlement> sObjects) {
-        super(sObjects);
-        Configuration.disableTriggerCRUDSecurity();
-    }
 
-    public class Constructor implements fflib_SObjectDomain.IConstructable {
-        public fflib_SObjectDomain construct(List<SObject> sObjects) {
-            return new EntitlementsService(sObjects);
-        }
-    }
-
-    public override void onApplyDefaults(){}
-    
-    public override void onAfterInsert() {
-        List<Entitlement> entitlements = (List<Entitlement>) Records;
-        saveEntitlement(entitlements);
-    }
-
-    public void saveEntitlement(List<Entitlement> entitlements) {
-        List<String> entitlementNames = new List<String>();
-        Map<String, Id> slaProcessNameToentitlementId = new Map<String, Id>();
-        Set<Id> validEntitlementProcessIds = new Set<Id>(); 
-        for(Entitlement each: entitlements){
-            if(
-                each.SlaProcessId == null || 
-                (each.StartDate == null || each.StartDate > Date.today()) ||
-                (each.EndDate == null || each.EndDate < Date.today())
-            ) {
-                continue;
-            }
-            validEntitlementProcessIds.add(each.Id);
-         }
-        if(validEntitlementProcessIds.isEmpty()){
-            return;
-        }
-        
-        System.enqueueJob(new MetadataEntitlementQueueable(validEntitlementProcessIds));
-    }
-
+/** BeeGroup
+* @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+* @description Class designed to handle the Entitlment
+* and Milestones General Manipulations
+**/
+public with sharing class EntitlementsHandler {
+    /** BeeGroup
+    * @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+    * @description Method designed to handle the conclusion of
+    * the milestones that have to be concluded
+    * @param cases the cases version to be commited
+    * @param oldCases the current version of the cases
+    **/
     public void finishMilestones(List<Case> cases, Map<Id, Case> oldCases) {
         Set<Id> entitlementIds = new Set<Id>();
         for(Case each: cases) {
@@ -62,11 +36,11 @@ public with sharing class EntitlementsService extends fflib_SObjectDomain {
         for(Case each: cases) {
             Map<String, String> milestoneToCondition = mapConditions.get(each.EntitlementId);
             for(String k: milestoneToCondition.keySet()) {
-                String milestoneConditions = milestoneToCondition.get(k);
+                String milestoneCriterias = milestoneToCondition.get(k);
                 FormulaEval.FormulaInstance isItSuper = Formula.builder()
                                 .withReturnType(FormulaEval.FormulaReturnType.BOOLEAN)
                                 .withType(Case.class)
-                                .withFormula(milestoneConditions)
+                                .withFormula(milestoneCriterias)
                                 .build();
 
                 if(!(!((Boolean) isItSuper.evaluate(each)) && ((Boolean) isItSuper.evaluate(oldCases.get(each.Id)))) ){

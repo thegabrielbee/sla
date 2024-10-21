@@ -4,6 +4,7 @@
 **/
 public with sharing class Cases extends fflib_SObjectDomain  {
     Map<Id, List<Case>> identifierDomainMapping = new Map<Id, List<Case>>();
+    Map<Id, Map<Id, Case>> identifierDomainMappingOld = new Map<Id, Map<Id, Case>>();
 
     public Cases(List<Entitlement> Cases) {
         super(Cases);
@@ -17,14 +18,24 @@ public with sharing class Cases extends fflib_SObjectDomain  {
         }
     }
 
+    /** BeeGroup
+    * @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+    * @description Method designed to separate cases by RecordTypeId
+    **/
     private void setIdentifierDomainMapping(){
         this.identifierDomainMapping = new Map<Id, List<Case>>();
+        this.identifierDomainMappingOld = new Map<Id, Map<Id, Case>>();
+        Map<Id, Case> oldCases = (Map<Id, Case>) existingRecords;
+
         List<Case> cases = (List<Case>) Records;
         for(Case each: cases) {
             List<Case> values = this.identifierDomainMapping.get(each.RecordTypeId);
             if(values == null) {
-                 values = new List<Case>();
-                 this.identifierDomainMapping.put(each.RecordTypeId, values);
+                values = new List<Case>();
+                this.identifierDomainMapping.put(each.RecordTypeId, values);
+                this.identifierDomainMappingOld.put(each.RecordTypeId, new Map<Id, Case>{ each.Id => oldCases.get(each.Id) });
+            } else {
+                this.identifierDomainMappingOld.get(each.RecordTypeId).put(each.Id, oldCases.get(each.Id));
             }
             values.add(each);
         }
@@ -33,13 +44,11 @@ public with sharing class Cases extends fflib_SObjectDomain  {
     public override void onApplyDefaults(){}
 
     public override void onAfterUpdate(Map<Id, Sobject> existingRecords) {
-        List<Case> cases = (List<Case>) Records;
-        Map<Id, Case> oldCases = (Map<Id, Case>) existingRecords;
-
-        for(Id identifier: identifierDomainMapping.keySet()){
-            List<Case> cases = identifierDomainMapping.get(identifier);
+        for(Id identifier: this.identifierDomainMapping.keySet()){
+            List<Case> cases = this.identifierDomainMapping.get(identifier);
+            Map<Id, Case> oldCases = this.identifierDomainMappingOld.get(identifier);
             fflib_SObjectDomain domain = CasesDomainFactory.getInstance().newDomain(identifier, cases);
-            doamin.onAfterUpdate();
+            domain.onAfterUpdate(oldCases);
         }
     }
 }

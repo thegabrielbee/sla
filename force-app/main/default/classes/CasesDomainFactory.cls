@@ -1,14 +1,30 @@
+/** BeeGroup
+* @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+* @description Class designed to provide a interface to ordered 
+* retrieve a Cases domain implementation by a Identifier
+**/
 public with sharing class CasesDomainFactory {
     private static CasesDomainFactory instance;
     private static String DEFAULT_DOMAIN_TYPE = 'Default';
 
+    /** BeeGroup
+    * @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+    * @description Method designed to retieve a instance 
+    * of the Factory
+    **/
     public static CasesDomainFactory getInstance(){
         if(instance == null){
             instance = new CasesDomainFactory();
         }
         return instance;
     }
-
+    
+    /** BeeGroup
+    * @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+    * @description Method designed to map the corresponding 
+    * domain Type Name implementation by a Identifier
+    * @param identifier the identifier that map the object domain implementation
+    **/
     public String getDomainByIdentifierType(String identifier){
         Map<String, Schema.RecordTypeInfo> indentifierToType = Schema.SObjectType.Case.getRecordTypeInfosByDeveloperName();
         Map<String, String> identifierToType = getIndentifierToType();
@@ -30,12 +46,24 @@ public with sharing class CasesDomainFactory {
         return identifierToType.get(typeKey);
     }
 
+    /** BeeGroup
+    * @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+    * @description Method designed to map the corresponding 
+    * domain implementation by a Identifier
+    **/
     public Map<String, String> getIndentifierToType(){
         return new Map<String, String> {
-            'Default' => 'CasesService.Constructor'
+            'Default' => 'CasesDefaultService.Constructor'
         };
     }
 
+    /** BeeGroup
+    * @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+    * @description Method designed to retrieve the corresponding 
+    * domain implementation by a Identifier
+    * @param identifier the identifier that map the object domain implementation
+    * @param objects the objects to be mapped by identifier
+    **/
     public fflib_SObjectDomain newDomain(String identifier, List<SObject> objects){
         String domainTypeName = getDomainByIdentifierType(identifier);
 

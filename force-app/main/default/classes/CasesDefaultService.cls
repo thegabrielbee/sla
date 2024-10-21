@@ -1,12 +1,17 @@
-public with sharing class CasesService extends fflib_SObjectDomain {
-    public CasesService(List<Case> sObjects) {
+/** BeeGroup
+* @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+* @description Class designed to handle the Case Object
+* trigger actions in Default Domain
+**/
+public with sharing class CasesDefaultService extends fflib_SObjectDomain {
+    public CasesDefaultService(List<Case> sObjects) {
         super(sObjects);
         Configuration.disableTriggerCRUDSecurity();
     }
 
     public class Constructor implements fflib_SObjectDomain.IConstructable {
         public fflib_SObjectDomain construct(List<SObject> sObjects) {
-            return new CasesService(sObjects);
+            return new CasesDefaultService(sObjects);
         }
     }
 
@@ -16,6 +21,6 @@ public with sharing class CasesService extends fflib_SObjectDomain {
         List<Case> cases = (List<Case>) Records;
         Map<Id, Case> oldCases = (Map<Id, Case>) existingRecords;
         
-        ((EntitlementsService) Injector.getInstance().instantiate(EntitlementsService.class)).finishMilestones(cases, oldCases);
+        ((EntitlementsHandler) Injector.getInstance().instantiate(EntitlementsHandler.class)).finishMilestones(cases, oldCases);
     }
 }

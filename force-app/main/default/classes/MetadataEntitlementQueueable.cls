@@ -1,15 +1,17 @@
+/** BeeGroup
+* @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+* @description Class designed to handle the  of creation
+* the Custom Setting Records for the Entitlement Process
+**/
 public with sharing class MetadataEntitlementQueueable implements Queueable, Database.AllowsCallouts {
     private Set<Id> validEntitlementProcessIds;
 
+    /** BeeGroup
+    * @author Gabriel Nasicmento - gabriel.carva@protonmail.com
+    * @param validEntitlementProcessIds Entitlement Ids to manipulate
+    **/
     public MetadataEntitlementQueueable(Set<Id> validEntitlementProcessIds) {
         this.validEntitlementProcessIds = validEntitlementProcessIds; 
-    }
-
-    public static MetadataService.MetadataPort createService() {
-        MetadataService.MetadataPort service = new MetadataService.MetadataPort();
-        service.SessionHeader = new MetadataService.SessionHeader_element();
-        service.SessionHeader.sessionId = UserInfo.getSessionId();
-        return service;
     }
 
     public void execute(QueueableContext context) {
@@ -21,7 +23,7 @@ public with sharing class MetadataEntitlementQueueable implements Queueable, Dat
             slaProcessNameToentitlementId.put(each.SlaProcess.NameNorm, each.Id);
         }
     
-        MetadataService.MetadataPort service = createService();
+        MetadataService.MetadataPort service = MetadataFactory.createService();
         // MIGRATE THIS TO CACHE TO AVOID MULTIPLE QUERIES, AND UPDATE THE CACHE IN ENTITLEMENT TRIGGER
         List<MetadataService.EntitlementProcess> ennt = (List<MetadataService.EntitlementProcess>) service.readMetadata('EntitlementProcess', entitlementNames).getRecords();
         
@@ -29,9 +31,9 @@ public with sharing class MetadataEntitlementQueueable implements Queueable, Dat
         List<MilestoneManagement__c> mcsList = MilestoneManagement__c.getall().values();
         for(MetadataService.EntitlementProcess each: ennt){
             for (MetadataService.EntitlementProcessMilestoneItem mlItem: each.milestones) {
-                List<MilestoneCondition> conditions = new List<MilestoneCondition>();
+                List<MilestoneCriteria> conditions = new List<MilestoneCriteria>();
                 for(MetadataService.FilterItem tmp: mlItem.milestoneCriteriaFilterItems){
-                    conditions.add(new MilestoneCondition(tmp.field, tmp.operation, tmp.value));
+                    conditions.add(new MilestoneCriteria(tmp.field, tmp.operation, tmp.value));
                 }
                 mcs.add(
                     new MilestoneManagement__c(
@@ -40,7 +42,7 @@ public with sharing class MetadataEntitlementQueueable implements Queueable, Dat
                         EntitlementDeveloperName__c=each.fullName,
                         MilestoneName__c=mlItem.milestoneName,
                         EntitlementId__c=slaProcessNameToentitlementId.get(each.fullName), 
-                        MilestoneCriteriaFormula__c=MilestoneCondition.toFormula(conditions)
+                        MilestoneCriteriaFormula__c=MilestoneCriteria.toFormula(conditions)
                     )
                 );
             }
