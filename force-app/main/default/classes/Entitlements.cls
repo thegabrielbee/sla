@@ -18,7 +18,7 @@ public with sharing class Entitlements extends fflib_SObjectDomain  {
 
     public override void onAfterInsert() {
         List<Entitlement> entitlements = (List<Entitlement>) Records;
-        fflib_SObjectDomain domain = EntitlementsDomainFactory.getInstance().newDomain('Default', entitlements);
+        fflib_SObjectDomain domain = EntitlementsDomainFactory.getInstance().newDomain(EntitlementsDomainFactory.DEFAULT_DOMAIN_TYPE, entitlements);
         if(domain == null){
             return;
         }

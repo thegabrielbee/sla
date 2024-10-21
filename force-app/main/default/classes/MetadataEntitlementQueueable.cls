@@ -27,17 +27,17 @@ public with sharing class MetadataEntitlementQueueable implements Queueable, Dat
         // MIGRATE THIS TO CACHE TO AVOID MULTIPLE QUERIES, AND UPDATE THE CACHE IN ENTITLEMENT TRIGGER
         List<MetadataService.EntitlementProcess> ennt = (List<MetadataService.EntitlementProcess>) service.readMetadata('EntitlementProcess', entitlementNames).getRecords();
         
-        List<MilestoneManagement__c> mcs = new List<MilestoneManagement__c>();
-        List<MilestoneManagement__c> mcsList = MilestoneManagement__c.getall().values();
+        List<MilestoneManagement__c> milestoneManagements = new List<MilestoneManagement__c>();
+        List<MilestoneManagement__c> milestoneManagementsActual = MilestoneManagement__c.getall().values();
         for(MetadataService.EntitlementProcess each: ennt){
             for (MetadataService.EntitlementProcessMilestoneItem mlItem: each.milestones) {
                 List<MilestoneCriteria> conditions = new List<MilestoneCriteria>();
                 for(MetadataService.FilterItem tmp: mlItem.milestoneCriteriaFilterItems){
                     conditions.add(new MilestoneCriteria(tmp.field, tmp.operation, tmp.value));
                 }
-                mcs.add(
+                milestoneManagements.add(
                     new MilestoneManagement__c(
-                        Name=slaProcessNameToentitlementId.get(each.fullName) + mlItem.milestoneName + String.valueOf(mcsList.size()),
+                        Name=slaProcessNameToentitlementId.get(each.fullName) + mlItem.milestoneName + String.valueOf(milestoneManagementsActual.size()),
                         Id__c=slaProcessNameToentitlementId.get(each.fullName) + each.fullName + mlItem.milestoneName,
                         EntitlementDeveloperName__c=each.fullName,
                         MilestoneName__c=mlItem.milestoneName,
@@ -47,6 +47,6 @@ public with sharing class MetadataEntitlementQueueable implements Queueable, Dat
                 );
             }
         }
-        ((DML) Injector.getInstance().instantiate(DML.class)).doInsert(mcs);
+        ((DML) Injector.getInstance().instantiate(DML.class)).doInsert(milestoneManagements);
     }
 }

@@ -5,7 +5,7 @@
 **/
 public with sharing class CasesDomainFactory {
     private static CasesDomainFactory instance;
-    private static String DEFAULT_DOMAIN_TYPE = 'Default';
+    public static String DEFAULT_DOMAIN_TYPE = 'Default';
 
     /** BeeGroup
     * @author Gabriel Nasicmento - gabriel.carva@protonmail.com
@@ -27,34 +27,23 @@ public with sharing class CasesDomainFactory {
     **/
     public String getDomainByIdentifierType(String identifier){
         Map<String, Schema.RecordTypeInfo> indentifierToType = Schema.SObjectType.Case.getRecordTypeInfosByDeveloperName();
-        Map<String, String> identifierToType = getIndentifierToType();
-        String typeKey;
+        String typeConstructorName;
 
-        for(String rtDeveloperName: identifierToType.keySet()) {
+        for(String rtDeveloperName: CasesDomainFactoryMap__mdt.getall().keySet()) {
             RecordTypeInfo rtInformation = indentifierToType.get(rtDeveloperName);
-            if(rtInformation == null) {
-                continue;
-            }
             if(rtInformation.getRecordTypeId() == identifier) {
-                typeKey = rtDeveloperName;
+                typeConstructorName = CasesDomainFactoryMap__mdt.getInstance(rtDeveloperName).DomainConstructorName__c;
                 break;
-            }            
+            }
         }
-        if(typeKey == null){
-            typeKey = DEFAULT_DOMAIN_TYPE;
-        }
-        return identifierToType.get(typeKey);
-    }
 
-    /** BeeGroup
-    * @author Gabriel Nasicmento - gabriel.carva@protonmail.com
-    * @description Method designed to map the corresponding 
-    * domain implementation by a Identifier
-    **/
-    public Map<String, String> getIndentifierToType(){
-        return new Map<String, String> {
-            'Default' => 'CasesDefaultService.Constructor'
-        };
+        if(typeConstructorName == null){
+            if(CasesDomainFactoryMap__mdt.getInstance(DEFAULT_DOMAIN_TYPE) == null){
+                throw new FactoryException('You should implement a Default Factory.');
+            }
+            typeConstructorName = CasesDomainFactoryMap__mdt.getInstance(DEFAULT_DOMAIN_TYPE).DomainConstructorName__c;
+        }
+        return typeConstructorName;
     }
 
     /** BeeGroup
