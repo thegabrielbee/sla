@@ -3,14 +3,14 @@
 * @description Class designed to handle the Entitlement Object trigger actions
 **/
 public with sharing class Entitlements extends fflib_SObjectDomain  {
-    public Entitlements(List<Entitlement> sObjects) {
-        super(sObjects);
+    public Entitlements(List<Entitlement> objects) {
+        super(objects);
         Configuration.disableTriggerCRUDSecurity();
     }
 
     public class Constructor implements fflib_SObjectDomain.IConstructable {
-        public fflib_SObjectDomain construct(List<SObject> sObjects) {
-            return new Entitlements(sObjects);
+        public fflib_SObjectDomain construct(List<SObject> objects) {
+            return new Entitlements(objects);
         }
     }
 

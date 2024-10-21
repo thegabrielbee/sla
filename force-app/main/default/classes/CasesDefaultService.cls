@@ -22,5 +22,6 @@ public with sharing class CasesDefaultService extends fflib_SObjectDomain {
         Map<Id, Case> oldCases = (Map<Id, Case>) existingRecords;
         
         ((EntitlementsHandler) Injector.getInstance().instantiate(EntitlementsHandler.class)).finishMilestones(cases, oldCases);
+        ((ElapsedTimesHandler) Injector.getInstance().instantiate(ElapsedTimesHandler.class)).createElapsedTime(cases, oldCases);
     }
 }

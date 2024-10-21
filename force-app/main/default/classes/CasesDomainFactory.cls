@@ -31,7 +31,7 @@ public with sharing class CasesDomainFactory {
 
         for(String rtDeveloperName: CasesDomainFactoryMap__mdt.getall().keySet()) {
             RecordTypeInfo rtInformation = indentifierToType.get(rtDeveloperName);
-            if(rtInformation.getRecordTypeId() == identifier) {
+            if(rtInformation != null && rtInformation.getRecordTypeId() == identifier) {
                 typeConstructorName = CasesDomainFactoryMap__mdt.getInstance(rtDeveloperName).DomainConstructorName__c;
                 break;
             }

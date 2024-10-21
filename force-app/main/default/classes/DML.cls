@@ -37,4 +37,8 @@ public with sharing class DML {
     public List<Database.MergeResult> doMerge(SObject master, List<SObject> duplicates){
         return Database.merge(master, duplicates);
     }
+
+    public List<Database.SaveResult> doPublish(List<SObject> objects){
+        return EventBus.publish(objects);
+    }
 }

@@ -35,8 +35,8 @@ public with sharing class EntitlementsHandler {
         Set<Id> caseIds = new Set<Id>();
         for(Case each: cases) {
             Map<String, String> milestoneToCondition = mapConditions.get(each.EntitlementId);
-            for(String k: milestoneToCondition.keySet()) {
-                String milestoneCriterias = milestoneToCondition.get(k);
+            for(String milestonesName: milestoneToCondition.keySet()) {
+                String milestoneCriterias = milestoneToCondition.get(milestonesName);
                 FormulaEval.FormulaInstance concludeMilestone = Formula.builder()
                                 .withReturnType(FormulaEval.FormulaReturnType.BOOLEAN)
                                 .withType(Case.class)
@@ -47,7 +47,11 @@ public with sharing class EntitlementsHandler {
                     continue;
                 }
                 caseIds.add(each.Id);
-                milestoneToCases.put(k, new Set<Id>{ each.Id });
+                if(milestoneToCases.get(milestonesName) == null){
+                    milestoneToCases.put(milestonesName, new Set<Id>{ each.Id });
+                } else {
+                    milestoneToCases.get(milestonesName).add(each.Id);
+                }
             }   
         }
 
@@ -65,6 +69,7 @@ public with sharing class EntitlementsHandler {
             }
             each.CompletionDate = Datetime.now();
         }
-        ((DML) Injector.getInstance().instantiate(DML.class)).doInsert(caseMilestone);
+        ((DML) Injector.getInstance().instantiate(DML.class)).doUpdate(caseMilestone);
+        ((ElapsedTimesHandler) Injector.getInstance().instantiate(ElapsedTimesHandler.class)).finishElapsedTime(caseMilestone);
     }
 }

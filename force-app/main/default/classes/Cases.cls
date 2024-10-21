@@ -6,15 +6,15 @@ public with sharing class Cases extends fflib_SObjectDomain  {
     Map<Id, List<Case>> identifierDomainMapping = new Map<Id, List<Case>>();
     Map<Id, Map<Id, Case>> identifierDomainMappingOld = new Map<Id, Map<Id, Case>>();
 
-    public Cases(List<Entitlement> Cases) {
-        super(Cases);
+    public Cases(List<Case> objects) {
+        super(objects);
         Configuration.disableTriggerCRUDSecurity();
         setIdentifierDomainMapping();
     }
 
     public class Constructor implements fflib_SObjectDomain.IConstructable {
-        public fflib_SObjectDomain construct(List<SObject> sObjectList) {
-            return new Cases(sObjectList);
+        public fflib_SObjectDomain construct(List<SObject> objects) {
+            return new Cases(objects);
         }
     }
 
@@ -26,8 +26,8 @@ public with sharing class Cases extends fflib_SObjectDomain  {
         this.identifierDomainMapping = new Map<Id, List<Case>>();
         this.identifierDomainMappingOld = new Map<Id, Map<Id, Case>>();
         Map<Id, Case> oldCases = (Map<Id, Case>) existingRecords;
-
         List<Case> cases = (List<Case>) Records;
+        
         for(Case each: cases) {
             List<Case> values = this.identifierDomainMapping.get(each.RecordTypeId);
             if(values == null) {
