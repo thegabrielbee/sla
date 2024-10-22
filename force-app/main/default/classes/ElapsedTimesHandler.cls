@@ -60,7 +60,8 @@ public with sharing class ElapsedTimesHandler {
         List<ElapsedTime__c> elapsedTimes = [
             SELECT
                 COMPLETIONDATE__C,
-                MILESTONE__C
+                MILESTONE__C,
+                CASE__C
             FROM
                 ELAPSEDTIME__C
             WHERE
@@ -85,6 +86,6 @@ public with sharing class ElapsedTimesHandler {
             );
         }
         ((DML) Injector.getInstance().instantiate(DML.class)).doUpdate(elapsedTimes);
-        ((DML) Injector.getInstance().instantiate(DML.class)).doUpdate(elapsedTimeEvents);
+        ((DML) Injector.getInstance().instantiate(DML.class)).doPublish(elapsedTimeEvents);
     }
 }
