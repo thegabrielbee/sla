@@ -56,21 +56,9 @@ public with sharing class ElapsedTimesHandler {
         for(CaseMilestone each: milestones){
             caseIds.add(each.CaseId);
             milestoneIds.add(each.Id);
-        }
-        List<ElapsedTime__c> elapsedTimes = [
-            SELECT
-                COMPLETIONDATE__C,
-                MILESTONE__C,
-                CASE__C
-            FROM
-                ELAPSEDTIME__C
-            WHERE
-                CASE__C IN :caseIds
-                AND MILESTONE__C IN :milestoneIds
-                AND ISCOMPLETED__C = FALSE
-        ];
-
-        if(elapsedTimes.isEmpty()){
+        } 
+        List<ElapsedTime__c> elapsedTimes = ((ElapsedTimesSelector) Injector.getInstance().instantiate(ElapsedTimesSelector.class)).selectElapsedTimesByCaseIdsAndMilestoneIdsAndIsCompleted(caseIds, milestoneIds, false);
+        if(elapsedTimes == null || elapsedTimes.isEmpty()){
             return;
         }
 

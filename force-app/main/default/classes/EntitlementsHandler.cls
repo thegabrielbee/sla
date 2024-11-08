@@ -58,18 +58,19 @@ public with sharing class EntitlementsHandler {
         if(caseIds.isEmpty()){
             return;
         }
-
-        List<CaseMilestone> caseMilestone = [SELECT CASEID, MILESTONETYPE.NAME, COMPLETIONDATE FROM CASEMILESTONE WHERE CASEID IN :caseIds AND ISCOMPLETED = FALSE AND MILESTONETYPE.NAME IN :milestoneToCases.keySet()];
-        if(caseMilestone.isEmpty()){
+ 
+        List<CaseMilestone> caseMilestones = ((CaseMilestonesSelector) Injector.getInstance().instantiate(CaseMilestonesSelector.class)).selectCaseMilestonesByCaseIdsAndMilestypeNameAndIsCompleted(caseIds, milestoneToCases.keySet(), false);
+        if(caseMilestones == null || caseMilestones.isEmpty()){
             return;
         }
-        for(CaseMilestone each: caseMilestone){
+
+        for(CaseMilestone each: caseMilestones){
             if(!milestoneToCases.get(each.MilestoneType.Name).contains(each.CaseId)){
                 continue;
             }
             each.CompletionDate = Datetime.now();
         }
-        ((DML) Injector.getInstance().instantiate(DML.class)).doUpdate(caseMilestone);
-        ((ElapsedTimesHandler) Injector.getInstance().instantiate(ElapsedTimesHandler.class)).finishElapsedTime(caseMilestone);
+        ((DML) Injector.getInstance().instantiate(DML.class)).doUpdate(caseMilestones);
+        ((ElapsedTimesHandler) Injector.getInstance().instantiate(ElapsedTimesHandler.class)).finishElapsedTime(caseMilestones);
     }
 }

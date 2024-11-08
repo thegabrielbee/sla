@@ -17,7 +17,11 @@ public with sharing class MetadataEntitlementQueueable implements Queueable, Dat
     public void execute(QueueableContext context) {
         List<String> entitlementNames = new List<String>();
         Map<String, Id> slaProcessNameToentitlementId = new Map<String, Id>();
-        List<Entitlement> entitlements = [SELECT SlaProcess.NameNorm FROM ENTITLEMENT WHERE ID IN :this.validEntitlementProcessIds];
+        List<Entitlement> entitlements = ((EntitlementsSelector) Injector.getInstance().instantiate(EntitlementsSelector.class)).selectEntitlementsByIds(this.validEntitlementProcessIds);
+        if(entitlements == null || entitlements.isEmpty()){
+            return;
+        }
+
         for(Entitlement each: entitlements){
             entitlementNames.add(each.SlaProcess.NameNorm);
             slaProcessNameToentitlementId.put(each.SlaProcess.NameNorm, each.Id);

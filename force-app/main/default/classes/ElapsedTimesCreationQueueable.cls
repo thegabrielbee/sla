@@ -5,24 +5,15 @@ public with sharing class ElapsedTimesCreationQueueable implements Queueable {
         this.milestoneToCaseIds = milestoneToCaseIds;
     }
 
-
     public void execute(QueueableContext context) {
         Set<Id> caseIds = new Set<Id>(); 
         for(String milestoneName: milestoneToCaseIds.keySet()){
             caseIds.addAll(milestoneToCaseIds.get(milestoneName));
         }
-        List<CaseMilestone> caseMilestones = [
-                                                SELECT 
-                                                    ID,
-                                                    CASEID,
-                                                    STARTDATE
-                                                FROM 
-                                                    CASEMILESTONE
-                                                WHERE 
-                                                    CASEID IN :caseIds 
-                                                    AND MILESTONETYPE.NAME IN :milestoneToCaseIds.keySet() 
-                                                    AND ISCOMPLETED = FALSE
-                                            ];
+        List<CaseMilestone> caseMilestones = ((CaseMilestonesSelector) Injector.getInstance().instantiate(CaseMilestonesSelector.class)).selectCaseMilestonesByCaseIdsAndMilestypeNameAndIsCompleted(caseIds, milestoneToCaseIds.keySet(), false);
+        if(caseMilestones == null || caseMilestones.isEmpty()){
+            return;
+        }
 
         List<ElapsedTime__c> elapsedTimes = new List<ElapsedTime__c>();
         for(CaseMilestone each: caseMilestones) {
