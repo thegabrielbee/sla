@@ -27,15 +27,21 @@ public with sharing class Cases extends fflib_SObjectDomain  {
         this.identifierDomainMappingOld = new Map<Id, Map<Id, Case>>();
         Map<Id, Case> oldCases = (Map<Id, Case>) existingRecords;
         List<Case> cases = (List<Case>) Records;
+        Case oldCase;
         
         for(Case each: cases) {
             List<Case> values = this.identifierDomainMapping.get(each.RecordTypeId);
+            if(oldCases != null) {
+                oldCase = oldCases.get(each.Id);
+            } else {
+                oldCase = null;
+            }
             if(values == null) {
                 values = new List<Case>();
                 this.identifierDomainMapping.put(each.RecordTypeId, values);
-                this.identifierDomainMappingOld.put(each.RecordTypeId, new Map<Id, Case>{ each.Id => oldCases.get(each.Id) });
+                this.identifierDomainMappingOld.put(each.RecordTypeId, new Map<Id, Case>{ each.Id =>  oldCase});
             } else {
-                this.identifierDomainMappingOld.get(each.RecordTypeId).put(each.Id, oldCases.get(each.Id));
+                this.identifierDomainMappingOld.get(each.RecordTypeId).put(each.Id, oldCase);
             }
             values.add(each);
         }
